@@ -1,26 +1,5 @@
 #include "stdafx.h"
 
-void PrintGraphStat(const PNGraph& G) {
-  PNGraph WCC = TSnap::GetMxWcc(G);
-  PNGraph SCC = TSnap::GetMxScc(G);
-  TFltPrV DegCCfV;
-  int64 ClosedTriads, OpenTriads;
-  int FullDiam;
-  double EffDiam;
-  printf("Nodes\t%d\n", G->GetNodes());
-  printf("Edges\t%d\n", G->GetEdges());
-  printf("Nodes in largest WCC\t%d (%.3f)\n", WCC->GetNodes(), WCC->GetNodes()/double(G->GetNodes()));
-  printf("Edges in largest WCC\t%d (%.3f)\n", WCC->GetEdges(), WCC->GetEdges()/double(G->GetEdges()));
-  printf("Nodes in largest SCC\t%d (%.3f)\n", SCC->GetNodes(), SCC->GetNodes()/double(G->GetNodes()));
-  printf("Edges in largest SCC\t%d (%.3f)\n", SCC->GetEdges(), SCC->GetEdges()/double(G->GetEdges()));
-  const double CCF = TSnap::GetClustCf(G, DegCCfV, ClosedTriads, OpenTriads);
-  printf("Average clustering coefficient\t%.4f\n", CCF);
-  printf("Number of triangles\t%s\n", TUInt64(ClosedTriads).GetStr().CStr());
-  printf("Fraction of closed triangles\t%.4g\n", ClosedTriads/double(ClosedTriads+OpenTriads));
-  TSnap::GetBfsEffDiam(G, 1000, false, EffDiam, FullDiam);
-  printf("Diameter (longest shortest path)\t%d\n", FullDiam);
-  printf("90-percentile effective diameter\t%.2g\n", EffDiam);
-}
 
 template<class PGraph> 
 void PrintGraphStatTable(const PGraph& G, TStr OutFNm, TStr Desc="") {

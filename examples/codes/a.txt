@@ -1,0 +1,5 @@
+Average Degree
+Power Law Exponent
+Local Clustering Coefficient
+Average Distance
+

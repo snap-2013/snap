@@ -13,7 +13,7 @@ void TGraphFeature::GrabStats(TFltV& V, TTuple <TFlt, fsEnumStatLast> & Stats) {
 }
 
 void TGraphFeature::SetDegPowerFit() {
-  TVec<TFltPr> F(NumNodes);
+  TVec<TFltPr> F(NumNodes,0);
   TVec <TInt> V(NumNodes);
   for (TUNGraph::TNodeI NI = Graph->BegNI(); NI < Graph->EndNI(); NI++) { V[NI.GetOutDeg()]++; }
   for (int i = 0;i < NumNodes; i++) {

@@ -47,6 +47,8 @@ template <class PGraph> int CntUniqDirEdges(const PGraph& Graph);
 template <class PGraph> int CntUniqBiDirEdges(const PGraph& Graph);
 template <class PGraph> int CntSelfEdges(const PGraph& Graph);
 
+double GetAsstyCor(const PUNGraph& Graph); //Computes the Assortativity Coefficient
+
 /////////////////////////////////////////////////
 // Manipulation
 template <class PGraph> PGraph GetUnDir(const PGraph& Graph);
@@ -65,8 +67,6 @@ template <class PGraph> bool IsTree(const PGraph& Graph, int& RootNId);
 template <class PGraph> int GetTreeRootNId(const PGraph& Graph) { int RootNId; Assert(IsTree(Graph, RootNId));  return RootNId; }
 template <class PGraph> void GetTreeSig(const PGraph& Graph, const int& RootNId, TIntV& Sig);
 template <class PGraph> void GetTreeSig(const PGraph& Graph, const int& RootNId, TIntV& Sig, TIntPrV& NodeMap);
-
-double GetAsstyCor(const PUNGraph& Graph);
 
 /////////////////////////////////////////////////
 // Implementation

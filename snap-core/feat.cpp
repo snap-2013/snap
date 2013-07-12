@@ -1,15 +1,15 @@
-void TGraphFeature::GrabStats(TFltV& V, TTuple <TFlt, EnumStatLast> & Stats) {
-  Stats[Avg] = Stats[Std] = 0.0;
+void TGraphFeature::GrabStats(TFltV& V, TTuple <TFlt, fsEnumStatLast> & Stats) {
+  Stats[fsAvg] = Stats[fsStd] = 0.0;
   V.Sort();
-  Stats[Mn] = V[0];
-  Stats[Md] = V[V.Len()/2];
-  Stats[Mx] = V[V.Len()-1];
+  Stats[fsMn] = V[0];
+  Stats[fsMd] = V[V.Len()/2];
+  Stats[fsMx] = V[V.Len()-1];
   for (int i = 0; i < V.Len(); i++) {
-    Stats[Avg] += V[i];
-    Stats[Std] += V[i] * V[i];
+    Stats[fsAvg] += V[i];
+    Stats[fsStd] += V[i] * V[i];
   }
-  Stats[Avg] = Stats[Avg] / (double)V.Len();
-  Stats[Std] = TMath::Sqrt(Stats[Std] / (double)V.Len() - Stats[Avg] * Stats[Avg]);
+  Stats[fsAvg] = Stats[fsAvg] / (double)V.Len();
+  Stats[fsStd] = TMath::Sqrt(Stats[fsStd] / (double)V.Len() - Stats[fsAvg] * Stats[fsAvg]);
 }
 
 void TGraphFeature::SetDegPowerFit() {
@@ -31,7 +31,7 @@ void TGraphFeature::SetDegCentr() {
 }
 
 void TGraphFeature::SetBetwCentr() {  //If sampling is done, the sampled values are rescaled to reflect more accurately the actual Betweeness values
-  double frac = min(1.0, (double)THRESHOLD_VAL / NumNodes);
+  double frac = min(1.0, (double)MaxSamplingSize / NumNodes);
   TIntFltH table;
   TSnap::GetBetweennessCentr(Graph,table,frac);
   TVec <TFlt> V(NumNodes);
@@ -70,24 +70,24 @@ void TGraphFeature::SetCCF() {
 }
 
 void TGraphFeature::SetDiam() {
-  TSnap::GetBfsEffDiam(Graph, min(THRESHOLD_VAL, NumNodes.Val), 0, EffDiam.Val, FullDiam.Val); //REMEMBER TO SET THRESHOLD VAL!!!
+  TSnap::GetBfsEffDiam(Graph, min(MaxSamplingSize, NumNodes.Val), 0, EffDiam.Val, FullDiam.Val);
 }
 
 void TGraphFeature::SetFracLCC() {
   TIntPrV V;
   TSnap::GetWccSzCnt(Graph, V);
   TIntPr tmp = V[V.Len()-1];
-  FracLCC[First] = (double)tmp.Val1 / NumNodes;
-  if (tmp.Val2 > 1) { FracLCC[Second] = FracLCC[First]; }
-  else if(V.Len() == 1) FracLCC[Second] = 0.0;
-  else { FracLCC[Second] = (double)V[V.Len()-2].Val1 / NumNodes; }
+  FracLCC[fsFirst] = (double)tmp.Val1 / NumNodes;
+  if (tmp.Val2 > 1) { FracLCC[fsSecond] = FracLCC[fsFirst]; }
+  else if(V.Len() == 1) FracLCC[fsSecond] = 0.0;
+  else { FracLCC[fsSecond] = (double)V[V.Len()-2].Val1 / NumNodes; }
 }
 
 void TGraphFeature::SetEgnVal() {
   TFltV V;
   TSnap::GetEigVals(Graph, 2, V);
-  EgnVal[First] = V[0];
-  EgnVal[Second] = V[1];
+  EgnVal[fsFirst] = V[0];
+  EgnVal[fsSecond] = V[1];
 }
 
 void TGraphFeature::SetAssty() {  

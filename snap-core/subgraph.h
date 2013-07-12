@@ -45,7 +45,10 @@ template<class POutGraph, class PInGraph> POutGraph ConvertESubGraph(const PInGr
 template<class PGraph> PGraph GetRndSubGraph(const PGraph& Graph, const int& NNodes);
 /// Returns a random subgraph of graph Graph with NEdges edges. ##TSnap::GetRndESubGraph
 template<class PGraph> PGraph GetRndESubGraph(const PGraph& Graph, const int& NEdges);
+/// renumbers the nodes in the graph
+template<class PGraph> void RenumberNodes(PGraph& Graph);
 
+template<class PGraph> void RemoveSelfLoops(PGraph &Graph);
 /////////////////////////////////////////////////
 // Implementation
 namespace TSnapDetail {
@@ -365,6 +368,28 @@ PGraph GetRndESubGraph(const PGraph& Graph, const int& NEdges) {
   EdgeV.Del(NEdges, EdgeV.Len()-1);
   IAssert(EdgeV.Len() == NEdges);
   return GetESubGraph(Graph, EdgeV);
+}
+
+template<class PGraph>
+void RenumberNodes(PGraph& Graph) {
+  PGraph ret = PGraph::TObj::New(Graph->GetNodes(),Graph->GetEdges());
+  int cnt = 0;
+  TIntIntH H(Graph->GetNodes()); 
+  for (typename PGraph::TObj::TNodeI NI = Graph->BegNI(); NI < Graph->EndNI(); NI++) {
+    ret->AddNode(cnt);
+    H.AddDat(NI.GetId()) = cnt++;
+  }
+  for (typename PGraph::TObj::TEdgeI EI = Graph->BegEI(); EI < Graph->EndEI(); EI++) {
+    ret->AddEdge(H.GetDat(EI.GetSrcNId()), H.GetDat(EI.GetDstNId()));
+  }
+  Graph = ret; 
+}
+
+template<class PGraph>
+void RemoveSelfLoops(PGraph& Graph) {
+  for (typename PGraph::TObj::TNodeI NI = Graph->BegNI(); NI < Graph->EndNI(); NI++) {
+    if (Graph->IsEdge(NI.GetId(), NI.GetId())) { Graph->DelEdge(NI.GetId(), NI.GetId()); }
+  }
 }
 
 } // namespace TSnap

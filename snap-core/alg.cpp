@@ -2,6 +2,7 @@ namespace TSnap {
 
 double GetAsstyCor(const PUNGraph& Graph) {
   TIntFltH deg(Graph->GetNodes()), deg_sq(Graph->GetNodes());
+  int cnt = 0;
   for (TUNGraph::TNodeI NI = Graph->BegNI(); NI < Graph->EndNI(); NI++) {
     deg.AddDat(NI.GetId()) = NI.GetOutDeg(); 
     deg_sq.AddDat(NI.GetId()) = NI.GetOutDeg() * NI.GetOutDeg();

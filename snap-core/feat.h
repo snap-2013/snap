@@ -17,7 +17,7 @@ public:
   TInt FullDiam;   TFlt EffDiam;                                     //Distance
   TFlt A, B, SigA, SigB, Chi2, R2;                                   //PowerFit Variables
   TTuple <TFlt, fsEnumSizeLast> FracLCC;                             //Fraction of vertices in Largest 2 Connected Components
-  TInt KCoreSize; TInt FracKCore;                                    //K-Core values
+  TInt KCoreSize; TFlt FracKCore;                                    //K-Core values
   TTuple <TFlt, fsEnumSizeLast> EgnVal;                              //Largest 2 Eigenvalues
   TFlt AsstyCor;                                                     //Assortativity Coefficient
   TTuple <TFlt, 10> motif;                                           //Array containing fraction of each motif occuring

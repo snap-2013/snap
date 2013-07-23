@@ -21,59 +21,6 @@ namespace TSnap {
  *
  */
 
-void GetMotifCount(const PUNGraph& G, const int MotifSize, TVec <int64> & MotifV);
-/*
- {
-  if (MotifSize == 3) {
-    MotifV = TVec <int64> (2);
-    TSnap::GetTriads(G,MotifV[0],MotifV[1],-1);
-  }
-  else {
-    MotifV = TVec <int64> (6);
-    for (TUNGraph::TEdgeI EI = G->BegEI(); EI < G->EndEI(); EI++) {
-      TUNGraph::TNodeI SrcNI = G->GetNI(EI.GetSrcNId()), DstNI = G->GetNI(EI.GetDstNId());
-      int SrcNId = SrcNI.GetId(), DstNId = DstNI.GetId();
-      TIntV SrcV(SrcNI.GetOutDeg(),0), DstV(DstNI.GetOutDeg(),0), BothV(min(SrcNI.GetOutDeg(), DstNI.GetOutDeg()),0);
-      //Grouping the vertices into sets
-      for (int e = 0; e < SrcNI.GetOutDeg(); e++) {
-        if (G->IsEdge(DstNId, SrcNI.GetOutNId(e)) ) { BothV.Add(SrcNI.GetOutNId(e)); }
-        else { SrcV.Add(SrcNI.GetOutNId(e)); }
-      }
-      for (int e = 0; e < DstNI.GetOutDeg(); e++) {
-        if (G->IsEdge(SrcNId, DstNI.GetOutNId(e)) == 0) { DstV.Add(DstNI.GetOutNId(e)); }
-      }
-      //Compute Motif 0 and 1
-      for (int i = 0; i < SrcV.Len(); i++) {
-        for (int j = 0; j < DstV.Len(); j++) {
-          if (G->IsEdge(SrcV[i], DstV[j]) ) { MotifV[1]++; }
-          else MotifV[0]++;
-        }
-      }
-      //Compute Motif 2 and 3
-      for (int i = 0; i < SrcV.Len(); i++) {
-        for (int j = i + 1; j < SrcV.Len(); j++) {
-          if (G->IsEdge(SrcV[i], SrcV[j]) ) { MotifV[3]++; }
-          else MotifV[2]++;
-        }
-      }
-      for (int i = 0; i < DstV.Len(); i++) {
-        for (int j = i + 1; j < DstV.Len(); j++) {
-          if (G->IsEdge(DstV[i], DstV[j]) ) { MotifV[3]++; }
-          else MotifV[2]++;
-        }
-      }
-      //Compute Motif 4 and 5
-      for (int i = 0; i < BothV.Len(); i++) {
-        for (int j = i + 1; j < BothV.Len(); j++) {
-          if (G->IsEdge(BothV[i], BothV[j]) ) { MotifV[5]++; }
-          else MotifV[4]++;
-        }
-      }
-    }
-    MotifV[1] /= 4ll;
-    MotifV[2] /= 3ll;
-    MotifV[5] /= 6ll;
-  }
-}*/
+void GetMotifCount(const PUNGraph& G, const int MotifSize, TVec <int64> & MotifV, const int num);
 
 }; //namespace TSnap

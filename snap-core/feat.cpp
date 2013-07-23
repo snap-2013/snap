@@ -1,25 +1,31 @@
-void TGraphFeature::GrabStats(TFltV& V, TTuple <TFlt, fsEnumStatLast> & Stats) {
-  Stats[fsAvg] = Stats[fsStd] = 0.0;
-  V.Sort();
-  Stats[fsMn] = V[0];
-  Stats[fsMd] = V[V.Len()/2];
-  Stats[fsMx] = V[V.Len()-1];
+void TGraphFeature::SetAvgStd(TFltV& V, TFlt & avg, TFlt & std) {
+  avg = std = 0.0;
   for (int i = 0; i < V.Len(); i++) {
-    Stats[fsAvg] += V[i];
-    Stats[fsStd] += V[i] * V[i];
+    avg += V[i];
+    std += V[i] * V[i];
   }
-  Stats[fsAvg] = Stats[fsAvg] / (double)V.Len();
-  Stats[fsStd] = TMath::Sqrt(Stats[fsStd] / (double)V.Len() - Stats[fsAvg] * Stats[fsAvg]);
+  avg = avg / (double)V.Len();
+  std = TMath::Sqrt(std / (double)V.Len() - avg * avg);
 }
 
-void TGraphFeature::SetDegPowerFit() {
-  TVec<TFltPr> F(NumNodes,0);
-  TVec <TInt> V(NumNodes);
-  for (TUNGraph::TNodeI NI = Graph->BegNI(); NI < Graph->EndNI(); NI++) { V[NI.GetOutDeg()]++; }
-  for (int i = 0;i < NumNodes; i++) {
-    if(V[i] > 0) { F.Add(TFltPr(i,V[i].Val)); }
+void TGraphFeature::SetFracDeg() {
+  TInt t1 = 0, t2 = 0;
+  TFlt AvgDeg = 0;
+  for (TUNGraph::TNodeI NI = Graph->BegNI(); NI < Graph->EndNI(); NI++) { AvgDeg += NI.GetOutDeg(); }
+  AvgDeg = AvgDeg / (double)NumNodes;
+  for (TUNGraph::TNodeI NI = Graph->BegNI(); NI < Graph->EndNI(); NI++) {
+    if (NI.GetOutDeg() >= AvgDeg.Val) t1 = t1 + 1;
+    if (NI.GetOutDeg() >= 2.0 * AvgDeg.Val) t2 = t2 + 1;
   }
-  TSpecFunc::PowerFit(F, A.Val, B.Val, SigA.Val, SigB.Val, Chi2.Val, R2.Val);
+  StatV[fsFracDeg] = (double)t1 / (double)NumNodes;
+  StatV[fsFrac2Deg] = (double)t2 / (double)NumNodes; 
+}
+
+void TGraphFeature::SetBiCon() {
+  TIntPrV V;
+  TSnap::GetBiConSzCnt(Graph, V);
+  StatV[fsFracBiCon] = 0.0;
+  StatV[fsFracBiCon] = (double)V[V.Len()-1].Val1.Val / (double)NumNodes; 
 }
 
 void TGraphFeature::SetDegCentr() {
@@ -27,7 +33,7 @@ void TGraphFeature::SetDegCentr() {
   for (TUNGraph::TNodeI NI = Graph->BegNI(); NI < Graph->EndNI(); NI++) {
     V[NI.GetId()] = TSnap::GetDegreeCentr(Graph, NI.GetId());
   }
-  GrabStats(V, DegC);
+  SetAvgStd(V, StatV[fsAvgDegC], StatV[fsStdDegC]);
 }
 
 void TGraphFeature::SetBetwCentr() {  //If sampling is done, the sampled values are rescaled to reflect more accurately the actual Betweeness values
@@ -36,26 +42,38 @@ void TGraphFeature::SetBetwCentr() {  //If sampling is done, the sampled values 
   TSnap::GetBetweennessCentr(Graph,table,frac);
   TVec <TFlt> V(NumNodes);
   for (TIntFltH::TIter HI = table.BegI(); HI < table.EndI(); HI++) { V[HI.GetKey()] = HI.GetDat() / frac; }
-  GrabStats(V, BetwC);
+  TFlt minVal = V[0].Val, maxVal = V[0].Val;
+  for (int i = 0; i < V.Len(); i++) {
+    minVal = min(minVal.Val, V[i].Val);
+    maxVal = max(maxVal.Val, V[i].Val);
+  }
+  for (int i = 0; i < V.Len(); i++) { V[i] = (V[i].Val - minVal.Val) / (maxVal.Val - minVal.Val); }
+  SetAvgStd(V, StatV[fsAvgBetwC], StatV[fsStdBetwC]);
 }
 
 void TGraphFeature::SetClsCentr() {
-  TVec <TFlt> V(NumNodes);
-  for (TUNGraph::TNodeI NI = Graph->BegNI(); NI < Graph->EndNI(); NI++) {
-    V[NI.GetId()] = TSnap::GetClosenessCentr(Graph,NI.GetId());
+  int num = min(MaxSamplingSize, NumNodes.Val);
+  TVec <TFlt> V(num);
+  for (int i = 0; i < num; i++) {
+    V[i] = TSnap::GetClosenessCentr(Graph, Graph->GetRndNId());
   }
-  GrabStats(V, ClsC);
+  SetAvgStd(V, StatV[fsAvgClsC], StatV[fsStdClsC]);
 }
 
 void TGraphFeature::SetKCore() {
   TKCore <PUNGraph> KG (Graph);
-  KCoreSize = 0;
+  StatV[fsFrac2Core] = StatV[fsFrac3Core] = StatV[fsFrac4Core] = 0.0;
+  TInt tmp = 0;
   while(1) {
     KG.GetNextCore();
     if(KG.GetCoreNodes() == 0) break;
-    KCoreSize = KCoreSize + 1;
+    tmp = tmp + 1;
+    if(tmp.Val == 2) { StatV[fsFrac2Core] = (double)KG.GetCoreNodes() / (double)NumNodes; }
+    else if(tmp.Val == 3) { StatV[fsFrac3Core] = (double)KG.GetCoreNodes() / (double)NumNodes; }
+    else if(tmp.Val == 4) { StatV[fsFrac4Core] = (double)KG.GetCoreNodes() / (double)NumNodes; }
   }
-  FracKCore = (double)(TSnap::GetKCore(Graph, KCoreSize))->GetNodes() / (double)NumNodes;
+  StatV[fsKCoreSize] = tmp;
+  StatV[fsFracKCore] = (double)(TSnap::GetKCore(Graph, tmp))->GetNodes() / (double)NumNodes;
 }
 
 void TGraphFeature::SetCCF() {
@@ -63,39 +81,55 @@ void TGraphFeature::SetCCF() {
   for (TUNGraph::TNodeI NI = Graph->BegNI(); NI < Graph->EndNI(); NI++) {
     V[NI.GetId()] = TSnap::GetNodeClustCf(Graph,NI.GetId());
   }
-  GrabStats(V, CCF);
-  TFltPrV DegCCfV;
-  CCF_Global = TSnap::GetClustCf(Graph, DegCCfV, ClosedTriads, OpenTriads);
-  FracTriads = (double)ClosedTriads / (double) (OpenTriads + ClosedTriads);
+  SetAvgStd(V, StatV[fsAvgCCF], StatV[fsStdCCF]);
 }
 
 void TGraphFeature::SetDiam() {
-  TSnap::GetBfsEffDiam(Graph, min(MaxSamplingSize, NumNodes.Val), 0, EffDiam.Val, FullDiam.Val);
+  int tmp;
+  TSnap::GetBfsEffDiam(Graph, min(MaxSamplingSize, NumNodes.Val), 0, StatV[fsEffDiam].Val, tmp);
+  StatV[fsFullDiam] = tmp;
 }
 
 void TGraphFeature::SetFracLCC() {
   TIntPrV V;
   TSnap::GetWccSzCnt(Graph, V);
   TIntPr tmp = V[V.Len()-1];
-  FracLCC[fsFirst] = (double)tmp.Val1 / NumNodes;
-  if (tmp.Val2 > 1) { FracLCC[fsSecond] = FracLCC[fsFirst]; }
-  else if(V.Len() == 1) FracLCC[fsSecond] = 0.0;
-  else { FracLCC[fsSecond] = (double)V[V.Len()-2].Val1 / NumNodes; }
+  StatV[fsFracLCC1] = (double)tmp.Val1 / (double)NumNodes;
+  if (tmp.Val2 > 1) { StatV[fsFracLCC2] = StatV[fsFracLCC1]; }
+  else if(V.Len() == 1) StatV[fsFracLCC2] = 0.0;
+  else { StatV[fsFracLCC2] = (double)V[V.Len()-2].Val1 / (double)NumNodes; }
 }
 
 void TGraphFeature::SetEgnVal() {
   TFltV V;
   TSnap::GetEigVals(Graph, 2, V);
-  EgnVal[fsFirst] = V[0];
-  EgnVal[fsSecond] = V[1];
+  StatV[fsEgnVal1] = V[0];
+  StatV[fsEgnVal2] = V[1];
+  if(StatV[fsEgnVal2].Val != StatV[fsEgnVal2].Val) { StatV[fsEgnVal2] = 0.0; } // Check for NaN
 }
 
 void TGraphFeature::SetAssty() {  
-  AsstyCor = TSnap::GetAsstyCor(Graph);
+  StatV[fsAsstyCor] = TSnap::GetAsstyCor(Graph);
+}
+
+void TGraphFeature::SetMotif() {
+  TVec <int64> A, B;
+  TInt num = min(NumEdges.Val, MaxMotSampleSize);
+  TSnap::GetMotifCount(Graph, 3, A, min(NumNodes.Val, MaxMotSampleSize));
+  TSnap::GetMotifCount(Graph, 4, B, min(NumEdges.Val, MaxMotSampleSize));
+  int64 t1 = 0, t2 = 0;
+  for (int i = 0; i < 2; i++) t1 += A[i];
+  MotV[fm3closed] = (t1 == 0)?0.0:((double)A[0] / t1);
+  MotV[fm3open] = (t1 == 0)?0.0:((double)A[1] / t1);
+  for (int i = 0; i < 6; i++) t2 += B[i];
+  for (int it = fm4line; it < fmLast; it++) {
+    MotV[it] = (t2 == 0)?0.0:((double)B[it - fm4line] / t2);
+  }
 }
 
 void TGraphFeature::SetAll() {
-  SetDegPowerFit();
+  SetFracDeg();
+  SetBiCon();
   SetDegCentr();
   SetBetwCentr();
   SetClsCentr();
@@ -105,4 +139,8 @@ void TGraphFeature::SetAll() {
   SetFracLCC();
   SetEgnVal();
   SetAssty();
+  SetMotif();
 }
+
+
+

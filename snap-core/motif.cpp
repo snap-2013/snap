@@ -21,24 +21,25 @@ namespace TSnap {
  *
  */
 
-void GetMotifCount(const PUNGraph& G, const int MotifSize, TVec <int64> & MotifV) {
+void GetMotifCount(const PUNGraph& G, const int MotifSize, TVec <int64> & MotifV, const int num) {
   if (MotifSize == 3) {
     MotifV = TVec <int64> (2);
     MotifV.PutAll(0);
-    TSnap::GetTriads(G,MotifV[0],MotifV[1],-1);
+    TSnap::GetTriads(G,MotifV[0],MotifV[1],num);
   }
   else {
     MotifV = TVec <int64> (6);
     MotifV.PutAll(0);
-    int MxVSize = 0;
-    for (TUNGraph::TNodeI NI = G->BegNI(); NI < G->EndNI(); NI++) {
-      MxVSize = max(MxVSize, NI.GetOutDeg());
-    }
-    TIntV SrcV(MxVSize), DstV(MxVSize), BothV(MxVSize);
+    TIntPrV V(G->GetEdges(), 0);
     for (TUNGraph::TEdgeI EI = G->BegEI(); EI < G->EndEI(); EI++) {
-      TUNGraph::TNodeI SrcNI = G->GetNI(EI.GetSrcNId()), DstNI = G->GetNI(EI.GetDstNId());
-      int SrcNId = SrcNI.GetId(), DstNId = DstNI.GetId();
-    //  TIntV SrcV(SrcNI.GetOutDeg(),0), DstV(DstNI.GetOutDeg(),0), BothV(min(SrcNI.GetOutDeg(), DstNI.GetOutDeg()),0);
+      V.Add(TIntPr(EI.GetSrcNId(), EI.GetDstNId()));
+    }
+    TRnd blargh;
+    V.Shuffle(blargh);
+    for (int z = 0; z < num; z++) {
+      int SrcNId = V[z].Val1.Val, DstNId = V[z].Val2.Val;
+      TUNGraph::TNodeI SrcNI = G->GetNI(SrcNId), DstNI = G->GetNI(DstNId);
+      TIntV SrcV(SrcNI.GetOutDeg(),0), DstV(DstNI.GetOutDeg(),0), BothV(min(SrcNI.GetOutDeg(), DstNI.GetOutDeg()),0);
       SrcV.Clr(0,-1);
       DstV.Clr(0,-1);
       BothV.Clr(0,-1);

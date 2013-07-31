@@ -37,16 +37,21 @@ void TGraphFeature::SetDegCentr() {
 }
 
 void TGraphFeature::SetBetwCentr() {  //If sampling is done, the sampled values are rescaled to reflect more accurately the actual Betweeness values
-  double frac = min(1.0, (double)MaxSamplingSize / NumNodes);
+  double frac = min(1.0, (double)10 / NumNodes);
+  printf("frac = %.12lf\n",frac);
   TIntFltH table;
   TSnap::GetBetweennessCentr(Graph,table,frac);
   TVec <TFlt> V(NumNodes);
-  for (TIntFltH::TIter HI = table.BegI(); HI < table.EndI(); HI++) { V[HI.GetKey()] = HI.GetDat() / frac; }
+  V.PutAll(0);
+  for (TIntFltH::TIter HI = table.BegI(); HI < table.EndI(); HI++) {
+    if(HI.GetDat().Val != HI.GetDat().Val) V[HI.GetKey()] = HI.GetDat() / frac; 
+  }
   TFlt minVal = V[0].Val, maxVal = V[0].Val;
   for (int i = 0; i < V.Len(); i++) {
     minVal = min(minVal.Val, V[i].Val);
     maxVal = max(maxVal.Val, V[i].Val);
   }
+  if(minVal != maxVal)
   for (int i = 0; i < V.Len(); i++) { V[i] = (V[i].Val - minVal.Val) / (maxVal.Val - minVal.Val); }
   SetAvgStd(V, StatV[fsAvgBetwC], StatV[fsStdBetwC]);
 }
@@ -68,11 +73,11 @@ void TGraphFeature::SetKCore() {
     KG.GetNextCore();
     if(KG.GetCoreNodes() == 0) break;
     tmp = tmp + 1;
-    if(tmp.Val == 2) { StatV[fsFrac2Core] = (double)KG.GetCoreNodes() / (double)NumNodes; }
-    else if(tmp.Val == 3) { StatV[fsFrac3Core] = (double)KG.GetCoreNodes() / (double)NumNodes; }
-    else if(tmp.Val == 4) { StatV[fsFrac4Core] = (double)KG.GetCoreNodes() / (double)NumNodes; }
   }
   StatV[fsKCoreSize] = tmp;
+  StatV[fsFrac2Core] = (double)(TSnap::GetKCore(Graph, 2))->GetNodes() / (double)NumNodes;
+  StatV[fsFrac3Core] = (double)(TSnap::GetKCore(Graph, 3))->GetNodes() / (double)NumNodes;
+  StatV[fsFrac4Core] = (double)(TSnap::GetKCore(Graph, 4))->GetNodes() / (double)NumNodes;
   StatV[fsFracKCore] = (double)(TSnap::GetKCore(Graph, tmp))->GetNodes() / (double)NumNodes;
 }
 

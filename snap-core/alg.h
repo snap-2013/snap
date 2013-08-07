@@ -47,7 +47,8 @@ template <class PGraph> int CntUniqDirEdges(const PGraph& Graph);
 template <class PGraph> int CntUniqBiDirEdges(const PGraph& Graph);
 template <class PGraph> int CntSelfEdges(const PGraph& Graph);
 
-double GetAsstyCor(const PUNGraph& Graph); //Computes the Assortativity Coefficient
+/// Returns the Assortativity Coefficient
+double GetAsstyCor(const PUNGraph& Graph);
 
 /////////////////////////////////////////////////
 // Manipulation

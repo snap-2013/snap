@@ -1,31 +1,10 @@
 namespace TSnap {
 
-/*
- * For MotifSize = 3, 0 is ClosedTriads, 1 is OpenTriads
- *
- * For MotifSize = 4, we use the following convention to label the motifs
- *
- * NOTE: The pair (a,b) represents an edge between a and b 
- *
- * 0 : (1,2), (2,3), (3,4)
- *
- * 1 : (1,2), (2,3), (3,4), (1,4)
- *
- * 2 : (1,2), (1,3), (1,4)
- *
- * 3 : (1,2), (1,3), (1,4), (2,3)
- *
- * 4 : (1,2), (1,3), (1,4), (2,3), (3,4)
- *
- * 5 : (1,2), (1,3), (1,4), (2,3), (3,4), (2,4)
- *
- */
-
 void GetMotifCount(const PUNGraph& G, const int MotifSize, TVec <int64> & MotifV, const int num) {
   if (MotifSize == 3) {
     MotifV = TVec <int64> (2);
     MotifV.PutAll(0);
-    TSnap::GetTriads(G,MotifV[0],MotifV[1],num);
+    TSnap::GetTriads(G,MotifV[mtThreeClosed],MotifV[mtThreeOpen],num);
   }
   else {
     MotifV = TVec <int64> (6);
@@ -54,34 +33,34 @@ void GetMotifCount(const PUNGraph& G, const int MotifSize, TVec <int64> & MotifV
       //Compute Motif 0 and 1
       for (int i = 0; i < SrcV.Len(); i++) {
         for (int j = 0; j < DstV.Len(); j++) {
-          if (G->IsEdge(SrcV[i], DstV[j]) ) { MotifV[1]++; }
-          else MotifV[0]++;
+          if (G->IsEdge(SrcV[i], DstV[j]) ) { MotifV[mfFourSquare]++; }
+          else MotifV[mfFourLine]++;
         }
       }
       //Compute Motif 2 and 3
       for (int i = 0; i < SrcV.Len(); i++) {
         for (int j = i + 1; j < SrcV.Len(); j++) {
-          if (G->IsEdge(SrcV[i], SrcV[j]) ) { MotifV[3]++; }
-          else MotifV[2]++;
+          if (G->IsEdge(SrcV[i], SrcV[j]) ) { MotifV[mfFourTriangleEdge]++; }
+          else MotifV[mfFourStar]++;
         }
       }
       for (int i = 0; i < DstV.Len(); i++) {
         for (int j = i + 1; j < DstV.Len(); j++) {
-          if (G->IsEdge(DstV[i], DstV[j]) ) { MotifV[3]++; }
-          else MotifV[2]++;
+          if (G->IsEdge(DstV[i], DstV[j]) ) { MotifV[mfFourSquare]++; }
+          else MotifV[mfFourStar]++;
         }
       }
       //Compute Motif 4 and 5
       for (int i = 0; i < BothV.Len(); i++) {
         for (int j = i + 1; j < BothV.Len(); j++) {
-          if (G->IsEdge(BothV[i], BothV[j]) ) { MotifV[5]++; }
-          else MotifV[4]++;
+          if (G->IsEdge(BothV[i], BothV[j]) ) { MotifV[mfFourComplete]++; }
+          else MotifV[mfFourSquareDiag]++;
         }
       }
     }
-    MotifV[1] /= 4ll;
-    MotifV[2] /= 3ll;
-    MotifV[5] /= 6ll;
+    MotifV[mfFourSquare] /= 4ll;
+    MotifV[mfFourStar] /= 3ll;
+    MotifV[mfFourSquareDiag] /= 6ll;
   }
 }
 

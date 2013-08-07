@@ -1,0 +1,5 @@
+--------
+/afs/cs.stanford.edu/u/shencq/workspace/snap-social/examples/graphstats/graphstats.Err
+Tue Aug  6 14:46:00 2013
+Execution stopped: (0<=ValN)&&(ValN<Vals) [Reason:'Index:6 Vals:6 MxVals:6 Type:4TVecIliE'], file ../glib-core/ds.h, line 457
+--------

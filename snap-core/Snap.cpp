@@ -19,12 +19,13 @@
 #include "subgraph.cpp"      // subgraph manipulations
 #include "anf.cpp"           // approximate diameter calculation
 #include "cncom.cpp"         // connected components
-#include "alg.cpp"           // misc graph algorithms
+//#include "alg.cpp"           // misc graph algorithms
 #include "gsvd.cpp"          // SVD and eigenvector computations
 #include "gstat.cpp"         // graph statistics
 #include "centr.cpp"         // centrality measures
 #include "cmty.cpp"          // community detection algorithms
 #include "feat.cpp"
+#include "motif.cpp"
 
 // graph generators
 #include "ggen.cpp"          // graph generators (preferential attachment, small-world, ...)

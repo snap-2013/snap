@@ -47,8 +47,8 @@ template <class PGraph> int CntUniqDirEdges(const PGraph& Graph);
 template <class PGraph> int CntUniqBiDirEdges(const PGraph& Graph);
 template <class PGraph> int CntSelfEdges(const PGraph& Graph);
 
-/// Returns the Assortativity Coefficient
-double GetAsstyCor(const PUNGraph& Graph);
+/// Returns the Assortativity Coefficient. Note: Only defined for PUNGraphs for now
+template <class PGraph> double GetAsstyCor(const PGraph& Graph);
 
 /////////////////////////////////////////////////
 // Manipulation
@@ -520,8 +520,10 @@ void GetTreeSig(const PGraph& Graph, const int& RootNId, TIntV& Sig, TIntPrV& No
     NodeMap[i].Val2 = i;
   }
 }
-/*
-double GetAsstyCor(const PUNGraph& Graph) {
+
+template <class PGraph>
+double GetAsstyCor(const PGraph& Graph) {
+  EAssertR(Graph->HasFlag(gfDirected) == 0, "Warning: Function is only defined for undirected graphs for now"); 
   TIntFltH deg(Graph->GetNodes()), deg_sq(Graph->GetNodes());
   for (TUNGraph::TNodeI NI = Graph->BegNI(); NI < Graph->EndNI(); NI++) {
     deg.AddDat(NI.GetId()) = NI.GetOutDeg(); 
@@ -538,6 +540,6 @@ double GetAsstyCor(const PUNGraph& Graph) {
   den1 /= (2.0 * m);
   num2 = (num2 / (2.0 * m)) * (num2 / (2.0 * m));
   return (num1 - num2) / (den1 - num2);
-}*/
+}
 
 }; // namespace TSnap

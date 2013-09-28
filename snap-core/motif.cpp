@@ -24,10 +24,12 @@ void GetMotifCount(const PUNGraph& G, const int MotifSize, TVec <int64> & MotifV
       BothV.Clr(0,-1);
       //Grouping the vertices into sets
       for (int e = 0; e < SrcNI.GetOutDeg(); e++) {
+        if (SrcNI.GetOutNId(e) == DstNId) continue;
         if (G->IsEdge(DstNId, SrcNI.GetOutNId(e)) ) { BothV.Add(SrcNI.GetOutNId(e)); }
         else { SrcV.Add(SrcNI.GetOutNId(e)); }
       }
       for (int e = 0; e < DstNI.GetOutDeg(); e++) {
+        if (DstNI.GetOutNId(e) == SrcNId) continue;
         if (G->IsEdge(SrcNId, DstNI.GetOutNId(e)) == 0) { DstV.Add(DstNI.GetOutNId(e)); }
       }
       //Compute Motif 0 and 1
@@ -60,7 +62,7 @@ void GetMotifCount(const PUNGraph& G, const int MotifSize, TVec <int64> & MotifV
     }
     MotifV[mfFourSquare] /= 4ll;
     MotifV[mfFourStar] /= 3ll;
-    MotifV[mfFourSquareDiag] /= 6ll;
+    MotifV[mfFourComplete] /= 6ll;
   }
 }
 

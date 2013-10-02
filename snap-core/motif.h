@@ -6,7 +6,7 @@ typedef enum {
 
 typedef enum {
   mfUndef = -1,
-  mfFourLine, mfFourTriangleEdge, mfFourStar, mfFourSquare, mfFourSquareDiag, mfFourComplete,
+  mfFourLine, mfFourSquare, mfFourStar, mfFourTriangleEdge, mfFourSquareDiag, mfFourComplete,
   mfLast
 }FourMotif;
 

@@ -48,7 +48,7 @@ void GetMotifCount(const PUNGraph& G, const int MotifSize, TVec <int64> & MotifV
       }
       for (int i = 0; i < DstV.Len(); i++) {
         for (int j = i + 1; j < DstV.Len(); j++) {
-          if (G->IsEdge(DstV[i], DstV[j]) ) { MotifV[mfFourSquare]++; }
+          if (G->IsEdge(DstV[i], DstV[j]) ) { MotifV[mfFourTriangleEdge]++; }
           else MotifV[mfFourStar]++;
         }
       }
